@@ -1,0 +1,39 @@
+{
+	"name": "email-validator",
+	"version": "0.1.0",
+	"private": true,
+	"proxy": {
+		"/api/*": {
+			"target": "http://localhost:5000"
+		}
+	},
+	"dependencies": {
+		"@types/lodash": "^4.14.107",
+		"axios": "^0.18.0",
+		"lodash": "^4.17.5",
+		"node-sass-chokidar": "^1.2.2",
+		"prettier": "^1.11.1",
+		"react": "^16.3.1",
+		"react-dom": "^16.3.1",
+		"react-scripts-ts": "2.14.0"
+	},
+	"scripts": {
+		"build-css": "node-sass-chokidar src/ -o src/",
+		"watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
+		"start-js": "react-scripts-ts start",
+		"start": "npm-run-all -p watch-css start-js",
+		"build-js": "react-scripts-ts build",
+		"build": "npm-run-all build-css build-js",
+		"test": "react-scripts-ts test --env=jsdom",
+		"eject": "react-scripts-ts eject"
+	},
+	"devDependencies": {
+		"@types/jest": "^22.2.2",
+		"@types/node": "^9.6.2",
+		"@types/react": "^16.3.6",
+		"@types/react-dom": "^16.0.4",
+		"npm-run-all": "^4.1.2",
+		"tslint-config-prettier": "^1.10.0",
+		"typescript": "^2.8.1"
+	}
+}
