@@ -8,7 +8,7 @@ class App extends React.Component {
 		return (
 			<div className="App">
 				<Header title="Invoice Simple E-mail Validator" />
-				<EmailForm label="E-mail Address" />
+				<EmailForm label="Please enter a valid e-mail address" placeholder="john@smith.com" />
 			</div>
 		);
 	}
