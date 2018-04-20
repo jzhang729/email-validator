@@ -1,15 +1,12 @@
 import * as React from 'react';
 import './Header.css';
 
-export interface Props {
-	title: string;
-}
-
-class Header extends React.Component<Props, object> {
-	render() {
-		const { title } = this.props;
-		return <header>{title}</header>;
-	}
-}
+const Header = ({ title, bgColor, textColor }) => {
+  return (
+    <header style={{ background: `${bgColor}`, color: `${textColor}` }}>
+      {title}
+    </header>
+  );
+};
 
 export default Header;

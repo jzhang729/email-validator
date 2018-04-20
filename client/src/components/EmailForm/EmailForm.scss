@@ -1,9 +1,12 @@
 .input__wrapper {
-	display: block;
-	margin: 10% auto;
-	padding: 1rem;
-	max-width: 50vw;
+  display: block;
+  margin: 10% auto auto auto;
+  padding: 1rem;
+  max-width: 50vw;
+  text-align: center;
 }
 
-.valid { color: green; }
-.invalid { color: red; }
+.validation__wrapper {
+  @extend .input__wrapper;
+  margin: 0 auto;
+}
