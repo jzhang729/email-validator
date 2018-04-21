@@ -16,10 +16,12 @@ export interface State {
   reason: string;
   valid: boolean;
   loading: boolean;
+  suggestions: any[];
 }
 
 export interface SyntheticEvent<T> {
   target: EventTarget & T;
+  key: KeyboardEvent & T;
 }
 
 class EmailForm extends React.Component<Props, State> {
@@ -27,12 +29,11 @@ class EmailForm extends React.Component<Props, State> {
     super(props);
     this.state = {
       checking: false,
-      // checking: true,
       email: '',
       reason: '',
       valid: false,
       loading: false,
-      // loading: true,
+      suggestions: [],
     };
 
     this.validRegexEmail = this.validRegexEmail.bind(this);
@@ -49,9 +50,9 @@ class EmailForm extends React.Component<Props, State> {
     return email.length > 0 && emailRegex.test(email);
   }
 
-  private checkEmail() {
-    if (!this.validRegexEmail()) {
-      return;
+  private checkEmail(key: string) {
+    if (key === '@') {
+      console.log('Typeahead should start here');
     }
 
     this.setState({ checking: true });
@@ -59,12 +60,16 @@ class EmailForm extends React.Component<Props, State> {
   }
 
   private verifyEmail() {
+    if (!this.validRegexEmail()) {
+      return;
+    }
+
     this.setState({ loading: true });
 
     axios
       .get(`/api/verify/${this.state.email}`)
       .then(res => {
-        console.log(res.data);
+        // console.log(res.data);
         let { result, reason } = res.data;
         if (result === 'deliverable' && reason === 'accepted_email') {
           this.setState({ valid: true, loading: false });
@@ -102,7 +107,7 @@ class EmailForm extends React.Component<Props, State> {
             onKeyUp={e => {
               _.debounce(this.checkEmail, 1500, {
                 leading: true,
-              })();
+              })(e.key);
             }}
             value={this.state.email}
           />
