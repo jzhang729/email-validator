@@ -14,6 +14,7 @@ class App extends React.Component {
           textColor="#f5f5f5"
         />
         <EmailForm
+          emailSuggestions={constants.emailSuggestions}
           emailRegex={constants.emailRegex}
           label="Please enter a valid e-mail address."
           placeholder="john@smith.com"

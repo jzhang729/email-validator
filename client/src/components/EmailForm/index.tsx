@@ -5,10 +5,11 @@ import './EmailForm.css';
 import ValidationStatus from '../ValidationStatus';
 
 export interface Props {
-  emailRegex?: any;
-  label?: string;
-  maxLength?: number;
-  placeholder?: string;
+  emailSuggestions: any;
+  emailRegex: any;
+  label: string;
+  maxLength: number;
+  placeholder: string;
 }
 
 export interface State {
@@ -26,6 +27,11 @@ export interface SyntheticEvent<T> {
 }
 
 class EmailForm extends React.Component<Props, State> {
+  refs: {
+    [key: string]: Element;
+    textInput: HTMLInputElement;
+  };
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -38,8 +44,53 @@ class EmailForm extends React.Component<Props, State> {
     };
 
     this.checkEmail = this.checkEmail.bind(this);
+    this.initTypeahead = this.initTypeahead.bind(this);
+    this.filterSuggestions = this.filterSuggestions.bind(this);
+    this.renderSuggestions = this.renderSuggestions.bind(this);
     this.validRegexEmail = this.validRegexEmail.bind(this);
     this.verifyEmail = this.verifyEmail.bind(this);
+  }
+
+  private filterSuggestions() {
+    let query = this.state.email.split('@').splice(1, 1)[0];
+
+    if (!query || query.length < 1) {
+      return;
+    }
+
+    let queryLength = query.length;
+
+    let suggestions =
+      queryLength === 0
+        ? []
+        : this.props.emailSuggestions.filter(item => {
+            return item.toLowerCase().slice(0, queryLength) === query;
+          });
+
+    this.setState({ suggestions });
+  }
+
+  private renderSuggestions() {
+    const { suggestions } = this.state;
+
+    if (suggestions.length === 0) {
+      return;
+    }
+    return (
+      <ul className="typehead__results">
+        {this.state.suggestions.map(item => {
+          return <li key={item}>{item}</li>;
+        })}
+      </ul>
+    );
+  }
+
+  private initTypeahead() {
+    this.refs.textInput.addEventListener('keyup', this.filterSuggestions);
+  }
+
+  componentWillUnmount() {
+    this.refs.textInput.removeEventListener('keyup', this.filterSuggestions);
   }
 
   /**
@@ -62,7 +113,7 @@ class EmailForm extends React.Component<Props, State> {
    */
   private checkEmail(key: string) {
     if (key === '@') {
-      console.log('Typeahead should start here');
+      this.initTypeahead();
     }
 
     this.setState({ checking: true });
@@ -112,22 +163,26 @@ class EmailForm extends React.Component<Props, State> {
     return (
       <div>
         <div className="input__wrapper">
-          <label htmlFor="email">{label}</label>
-          <input
-            id="email"
-            type="email"
-            placeholder={placeholder}
-            maxLength={maxLength}
-            onChange={e => {
-              this.setState({ email: e.target.value });
-            }}
-            onKeyUp={e => {
-              _.debounce(this.checkEmail, 1500, {
-                leading: true,
-              })(e.key);
-            }}
-            value={this.state.email}
-          />
+          <div className="typeahead">
+            <label htmlFor="email">{label}</label>
+            <input
+              ref="textInput"
+              id="email"
+              type="email"
+              placeholder={placeholder}
+              maxLength={maxLength}
+              onChange={e => {
+                this.setState({ email: e.target.value });
+              }}
+              onKeyUp={e => {
+                _.debounce(this.checkEmail, 1500, {
+                  leading: true,
+                })(e.key);
+              }}
+              value={this.state.email}
+            />
+            {this.renderSuggestions()}
+          </div>
         </div>
 
         {this.validRegexEmail() ? (

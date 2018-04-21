@@ -1,12 +1,13 @@
 {
-  "name": "invoice-simple",
+  "name": "email-validator",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "client": "npm run start --prefix client",
     "server": "nodemon index.js --ignore public",
-    "dev": "NODE_ENV=development concurrently \"npm run server\" \"npm run client\"",
+    "dev":
+      "NODE_ENV=development concurrently \"npm run server\" \"npm run client\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
