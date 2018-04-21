@@ -1,5 +1,6 @@
 import * as React from 'react';
 import './App.css';
+import { constants } from './config';
 import EmailForm from './components/EmailForm';
 import Header from './components/Header';
 
@@ -13,8 +14,10 @@ class App extends React.Component {
           textColor="#f5f5f5"
         />
         <EmailForm
-          label="Please enter a valid e-mail address"
+          emailRegex={constants.emailRegex}
+          label="Please enter a valid e-mail address."
           placeholder="john@smith.com"
+          maxLength={50}
         />
       </div>
     );

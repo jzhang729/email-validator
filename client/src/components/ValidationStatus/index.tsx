@@ -13,21 +13,9 @@ class ValidationStatus extends React.Component<Props, {}> {
   constructor(props: Props) {
     super(props);
 
-    this.renderSuccess = this.renderSuccess.bind(this);
     this.renderFailure = this.renderFailure.bind(this);
     this.renderLoading = this.renderLoading.bind(this);
-  }
-
-  private renderSuccess() {
-    if (this.props.loading) {
-      return null;
-    }
-
-    let classes = classnames('draw', {
-      checkmark: this.props.valid,
-    });
-
-    return <div className={classes} />;
+    this.renderSuccess = this.renderSuccess.bind(this);
   }
 
   private renderFailure() {
@@ -41,6 +29,18 @@ class ValidationStatus extends React.Component<Props, {}> {
     });
 
     return classes;
+  }
+
+  private renderSuccess() {
+    if (this.props.loading) {
+      return null;
+    }
+
+    let classes = classnames('draw', {
+      checkmark: this.props.valid,
+    });
+
+    return <div className={classes} />;
   }
 
   public render() {

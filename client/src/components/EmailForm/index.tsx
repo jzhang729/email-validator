@@ -1,27 +1,28 @@
-import axios from 'axios';
 import * as _ from 'lodash';
 import * as React from 'react';
-
-import ValidationStatus from '../ValidationStatus';
+import axios from 'axios';
 import './EmailForm.css';
+import ValidationStatus from '../ValidationStatus';
 
 export interface Props {
+  emailRegex?: any;
   label?: string;
+  maxLength?: number;
   placeholder?: string;
 }
 
 export interface State {
   checking: boolean;
   email: string;
-  reason: string;
-  valid: boolean;
   loading: boolean;
+  reason: string;
   suggestions: any[];
+  valid: boolean;
 }
 
 export interface SyntheticEvent<T> {
-  target: EventTarget & T;
   key: KeyboardEvent & T;
+  target: EventTarget & T;
 }
 
 class EmailForm extends React.Component<Props, State> {
@@ -30,26 +31,35 @@ class EmailForm extends React.Component<Props, State> {
     this.state = {
       checking: false,
       email: '',
-      reason: '',
-      valid: false,
       loading: false,
+      reason: '',
       suggestions: [],
+      valid: false,
     };
 
-    this.validRegexEmail = this.validRegexEmail.bind(this);
     this.checkEmail = this.checkEmail.bind(this);
+    this.validRegexEmail = this.validRegexEmail.bind(this);
     this.verifyEmail = this.verifyEmail.bind(this);
   }
 
+  /**
+   * Before sending a network request to Kickbox API,
+   * check that the e-mail follows correct regex protocol.
+   * @returns {boolean}
+   */
   private validRegexEmail() {
+    const { emailRegex } = this.props;
     const { email } = this.state;
-
-    // Regex taken from http://emailregex.com
-    const emailRegex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/;
 
     return email.length > 0 && emailRegex.test(email);
   }
 
+  /**
+   * Initiates the e-mail check process and detects @ symbol keyup to initiate
+   * typeahead suggestions.
+   * @param key {string} The detected key on keyup event to activate typeahead.
+   * @returns {null}
+   */
   private checkEmail(key: string) {
     if (key === '@') {
       console.log('Typeahead should start here');
@@ -59,6 +69,11 @@ class EmailForm extends React.Component<Props, State> {
     this.verifyEmail();
   }
 
+  /**
+    * Makes the call to the Kickbox API and sets component state accordingly.
+    @returns {Promise} Promise resolves if Kickbox API responds with an object,
+    otherwise logs the error to the console.
+  */
   private verifyEmail() {
     if (!this.validRegexEmail()) {
       return;
@@ -83,7 +98,7 @@ class EmailForm extends React.Component<Props, State> {
           })
           .join(' ');
 
-        detailedReason += '. Please try another e-mail.';
+        detailedReason += '. Please check and try again.';
 
         this.setState({ valid: false, loading: false, reason: detailedReason });
       })
@@ -91,7 +106,8 @@ class EmailForm extends React.Component<Props, State> {
   }
 
   public render() {
-    const { label, placeholder } = this.props;
+    const { label, maxLength, placeholder } = this.props;
+    const { checking, loading, reason, valid } = this.state;
 
     return (
       <div>
@@ -101,6 +117,7 @@ class EmailForm extends React.Component<Props, State> {
             id="email"
             type="email"
             placeholder={placeholder}
+            maxLength={maxLength}
             onChange={e => {
               this.setState({ email: e.target.value });
             }}
@@ -116,10 +133,10 @@ class EmailForm extends React.Component<Props, State> {
         {this.validRegexEmail() ? (
           <div className="validation__wrapper">
             <ValidationStatus
-              checking={this.state.checking}
-              loading={this.state.loading}
-              valid={this.state.valid}
-              reason={this.state.reason}
+              checking={checking}
+              loading={loading}
+              reason={reason}
+              valid={valid}
             />
           </div>
         ) : null}
