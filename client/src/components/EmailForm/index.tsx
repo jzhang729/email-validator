@@ -5,7 +5,7 @@ import './EmailForm.css';
 import ValidationStatus from '../ValidationStatus';
 
 export interface Props {
-  emailSuggestions: any;
+  emailSuggestions: string[];
   emailRegex: any;
   label: string;
   maxLength: number;
@@ -18,6 +18,7 @@ export interface State {
   loading: boolean;
   reason: string;
   suggestions: any[];
+  suggestionsVisible: boolean;
   valid: boolean;
 }
 
@@ -34,31 +35,44 @@ class EmailForm extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
+
     this.state = {
       checking: false,
       email: '',
       loading: false,
       reason: '',
       suggestions: [],
+      suggestionsVisible: false,
       valid: false,
     };
 
     this.checkEmail = this.checkEmail.bind(this);
     this.initTypeahead = this.initTypeahead.bind(this);
-    this.filterSuggestions = this.filterSuggestions.bind(this);
+    this.typeaheadCallback = this.typeaheadCallback.bind(this);
     this.renderSuggestions = this.renderSuggestions.bind(this);
+    this.useSuggestion = this.useSuggestion.bind(this);
     this.validRegexEmail = this.validRegexEmail.bind(this);
     this.verifyEmail = this.verifyEmail.bind(this);
   }
 
-  private filterSuggestions() {
-    let query = this.state.email.split('@').splice(1, 1)[0];
+  private typeaheadCallback() {
+    const { email } = this.state;
+    const query = email.split('@').splice(1, 1)[0];
+    let queryLength;
 
-    if (!query || query.length < 1) {
-      return;
+    if (email.length === 0) {
+      this.setState({ suggestions: [], suggestionsVisible: false });
     }
 
-    let queryLength = query.length;
+    try {
+      queryLength = query.length;
+    } catch (e) {
+      queryLength = 0;
+    }
+
+    if (!query || queryLength < 1) {
+      return;
+    }
 
     let suggestions =
       queryLength === 0
@@ -67,30 +81,55 @@ class EmailForm extends React.Component<Props, State> {
             return item.toLowerCase().slice(0, queryLength) === query;
           });
 
-    this.setState({ suggestions });
+    this.setState({ suggestions, suggestionsVisible: true });
+  }
+
+  private useSuggestion(e) {
+    const inputValue = this.refs.textInput.value;
+    const emailDomain = e.target.innerHTML;
+    const substringToReplace = /@(.*)/.exec(this.state.email)[1];
+    const newString = inputValue.replace(substringToReplace, emailDomain);
+
+    this.setState(
+      {
+        suggestions: [],
+        suggestionsVisible: false,
+        email: newString,
+      },
+      this.verifyEmail
+    );
   }
 
   private renderSuggestions() {
-    const { suggestions } = this.state;
+    const { suggestions, suggestionsVisible } = this.state;
 
-    if (suggestions.length === 0) {
-      return;
-    }
     return (
-      <ul className="typehead__results">
-        {this.state.suggestions.map(item => {
-          return <li key={item}>{item}</li>;
-        })}
-      </ul>
+      <div>
+        {!suggestionsVisible || suggestions.length === 0 ? null : (
+          <ul className="typeahead__ul">
+            {this.state.suggestions.map(item => {
+              return (
+                <li
+                  className="typeahead__li"
+                  key={item}
+                  onClick={this.useSuggestion}
+                >
+                  {item}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
     );
   }
 
   private initTypeahead() {
-    this.refs.textInput.addEventListener('keyup', this.filterSuggestions);
+    this.refs.textInput.addEventListener('keyup', this.typeaheadCallback);
   }
 
   componentWillUnmount() {
-    this.refs.textInput.removeEventListener('keyup', this.filterSuggestions);
+    this.refs.textInput.removeEventListener('keyup', this.typeaheadCallback);
   }
 
   /**
@@ -116,7 +155,10 @@ class EmailForm extends React.Component<Props, State> {
       this.initTypeahead();
     }
 
-    this.setState({ checking: true });
+    if (!this.validRegexEmail()) {
+      return null;
+    }
+
     this.verifyEmail();
   }
 
@@ -126,11 +168,7 @@ class EmailForm extends React.Component<Props, State> {
     otherwise logs the error to the console.
   */
   private verifyEmail() {
-    if (!this.validRegexEmail()) {
-      return;
-    }
-
-    this.setState({ loading: true });
+    this.setState({ loading: true, checking: true });
 
     axios
       .get(`/api/verify/${this.state.email}`)
@@ -151,7 +189,11 @@ class EmailForm extends React.Component<Props, State> {
 
         detailedReason += '. Please check and try again.';
 
-        this.setState({ valid: false, loading: false, reason: detailedReason });
+        this.setState({
+          valid: false,
+          loading: false,
+          reason: detailedReason,
+        });
       })
       .catch(err => console.log(err));
   }
