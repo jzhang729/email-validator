@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import axios from 'axios';
 import './EmailForm.css';
+import Typeahead from '../Typeahead';
 import ValidationStatus from '../ValidationStatus';
 
 export interface Props {
@@ -49,13 +50,12 @@ class EmailForm extends React.Component<Props, State> {
     this.checkEmail = this.checkEmail.bind(this);
     this.initTypeahead = this.initTypeahead.bind(this);
     this.typeaheadCallback = this.typeaheadCallback.bind(this);
-    this.renderSuggestions = this.renderSuggestions.bind(this);
     this.useSuggestion = this.useSuggestion.bind(this);
     this.validRegexEmail = this.validRegexEmail.bind(this);
     this.verifyEmail = this.verifyEmail.bind(this);
   }
 
-  private typeaheadCallback() {
+  typeaheadCallback(e) {
     const { email } = this.state;
     const query = email.split('@').splice(1, 1)[0];
     let queryLength;
@@ -84,47 +84,10 @@ class EmailForm extends React.Component<Props, State> {
     this.setState({ suggestions, suggestionsVisible: true });
   }
 
-  private useSuggestion(e) {
-    const inputValue = this.refs.textInput.value;
-    const emailDomain = e.target.innerHTML;
-    const substringToReplace = /@(.*)/.exec(this.state.email)[1];
-    const newString = inputValue.replace(substringToReplace, emailDomain);
-
-    this.setState(
-      {
-        suggestions: [],
-        suggestionsVisible: false,
-        email: newString,
-      },
-      this.verifyEmail
-    );
-  }
-
-  private renderSuggestions() {
-    const { suggestions, suggestionsVisible } = this.state;
-
-    return (
-      <div>
-        {!suggestionsVisible || suggestions.length === 0 ? null : (
-          <ul className="typeahead__ul">
-            {this.state.suggestions.map(item => {
-              return (
-                <li
-                  className="typeahead__li"
-                  key={item}
-                  onClick={this.useSuggestion}
-                >
-                  {item}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
-    );
-  }
-
-  private initTypeahead() {
+  /**
+   * Called when a keyup event is detected on the text input
+   */
+  initTypeahead() {
     this.refs.textInput.addEventListener('keyup', this.typeaheadCallback);
   }
 
@@ -137,7 +100,7 @@ class EmailForm extends React.Component<Props, State> {
    * check that the e-mail follows correct regex protocol.
    * @returns {boolean}
    */
-  private validRegexEmail() {
+  validRegexEmail() {
     const { emailRegex } = this.props;
     const { email } = this.state;
 
@@ -147,14 +110,16 @@ class EmailForm extends React.Component<Props, State> {
   /**
    * Initiates the e-mail check process and detects @ symbol keyup to initiate
    * typeahead suggestions.
-   * @param key {string} The detected key on keyup event to activate typeahead.
+   * @param e {event} They keyboard event that initiates the callback.
    * @returns {null}
    */
-  private checkEmail(key: string) {
-    if (key === '@') {
+  checkEmail(e: any) {
+    // Detect the @ symbol to initiate typeahead
+    if (e.which === 64) {
       this.initTypeahead();
     }
 
+    // Don't check e-mail unless it meets valid regex conditions.
     if (!this.validRegexEmail()) {
       return null;
     }
@@ -163,17 +128,42 @@ class EmailForm extends React.Component<Props, State> {
   }
 
   /**
+   * Initiates the e-mail check process and detects @ symbol keyup to initiate 
+   typeahead suggestions.
+   * Unbinds the keyup event listener on the text input to prevent 
+   new suggestions from showing after the user has already picked one
+   * @param value {string} Uses the domain name suggestion that the user picks
+   * @returns {null}
+   */
+  useSuggestion(value) {
+    const inputValue = this.refs.textInput.value;
+    const substringToReplace = /@(.*)/.exec(this.state.email)[1];
+    const newString = inputValue.replace(substringToReplace, value);
+
+    this.setState(
+      {
+        suggestions: [],
+        suggestionsVisible: false,
+        email: newString,
+      },
+      this.verifyEmail
+    );
+
+    // Unbind the keyup event listener on the text input
+    this.refs.textInput.removeEventListener('keyup', this.typeaheadCallback);
+  }
+
+  /**
     * Makes the call to the Kickbox API and sets component state accordingly.
     @returns {Promise} Promise resolves if Kickbox API responds with an object,
     otherwise logs the error to the console.
   */
-  private verifyEmail() {
+  verifyEmail() {
     this.setState({ loading: true, checking: true });
 
     axios
       .get(`/api/verify/${this.state.email}`)
       .then(res => {
-        // console.log(res.data);
         let { result, reason } = res.data;
         if (result === 'deliverable' && reason === 'accepted_email') {
           this.setState({ valid: true, loading: false });
@@ -198,9 +188,16 @@ class EmailForm extends React.Component<Props, State> {
       .catch(err => console.log(err));
   }
 
-  public render() {
+  render() {
     const { label, maxLength, placeholder } = this.props;
-    const { checking, loading, reason, valid } = this.state;
+    const {
+      checking,
+      loading,
+      reason,
+      valid,
+      suggestions,
+      suggestionsVisible,
+    } = this.state;
 
     return (
       <div>
@@ -216,14 +213,19 @@ class EmailForm extends React.Component<Props, State> {
               onChange={e => {
                 this.setState({ email: e.target.value });
               }}
-              onKeyUp={e => {
+              onKeyPress={e => {
                 _.debounce(this.checkEmail, 1500, {
                   leading: true,
-                })(e.key);
+                })(e);
               }}
               value={this.state.email}
             />
-            {this.renderSuggestions()}
+            {suggestionsVisible && suggestions.length > 0 ? (
+              <Typeahead
+                suggestions={suggestions}
+                useSuggestion={this.useSuggestion}
+              />
+            ) : null}
           </div>
         </div>
 
