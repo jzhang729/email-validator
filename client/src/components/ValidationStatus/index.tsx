@@ -32,7 +32,7 @@ class ValidationStatus extends React.Component<Props, {}> {
   }
 
   private renderSuccess() {
-    if (this.props.loading) {
+    if (this.props.loading || !this.props.checking) {
       return null;
     }
 

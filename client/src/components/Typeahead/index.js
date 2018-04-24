@@ -1,6 +1,5 @@
 import * as classnames from 'classnames';
 import * as React from 'react';
-import * as ReactDom from 'react-dom';
 import './Typeahead.css';
 
 export interface Props {
@@ -10,6 +9,7 @@ export interface Props {
 
 export interface State {
   selectedIndex: number;
+  mouseHovering: boolean;
 }
 
 class Typeahead extends React.Component<Props, State> {
@@ -23,62 +23,61 @@ class Typeahead extends React.Component<Props, State> {
 
     this.state = { selectedIndex: -1 };
 
-    this.onKeyDown = this.onKeyDown.bind(this);
-    this.downArrow = this.downArrow.bind(this);
-    this.upArrow = this.upArrow.bind(this);
-    this.enterKey = this.enterKey.bind(this);
+    this._keyArrowDown = this._keyArrowDown.bind(this);
+    this._keyArrowUp = this._keyArrowUp.bind(this);
+    this._keyEnter = this._keyEnter.bind(this);
+    this._onKeyDown = this._onKeyDown.bind(this);
+    this._renderListItems = this._renderListItems.bind(this);
   }
 
-  componentDidMount() {
-    window.addEventListener('keydown', this.onKeyDown);
+  _keyArrowDown() {
+    const { selectedIndex } = this.state;
+
+    if (selectedIndex < this.props.suggestions.length) {
+      this.setState({ selectedIndex: selectedIndex + 1 });
+    } else {
+      this.setState({ selectedIndex: 0 });
+    }
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.onKeyDown);
+  _keyArrowUp() {
+    const { selectedIndex } = this.state;
+
+    if (selectedIndex > 0) {
+      this.setState({ selectedIndex: selectedIndex - 1 });
+    } else {
+      this.setState({ selectedIndex: this.props.suggestions.length });
+    }
   }
 
-  onKeyDown(e) {
-    // console.log(e.which);
+  _keyEnter() {
+    const value = this.props.suggestions[this.state.selectedIndex] || '';
+    this.props.useSuggestion(value);
+  }
+
+  _onKeyDown(e) {
     switch (e.which) {
       case 13:
-        this.enterKey();
+        this._keyEnter();
         break;
       case 38:
-        this.upArrow();
+        this._keyArrowUp();
         break;
       case 40:
-        this.downArrow();
+        this._keyArrowDown();
         break;
       default:
         return null;
     }
   }
 
-  downArrow() {
-    if (this.state.selectedIndex < this.props.suggestions.length) {
-      this.setState({ selectedIndex: this.state.selectedIndex + 1 });
-    } else {
-      this.setState({ selectedIndex: 0 });
-    }
-  }
+  _renderListItems() {
+    const { suggestions, useSuggestion } = this.props;
+    const { selectedIndex, mouseHovering } = this.state;
 
-  upArrow() {
-    if (this.state.selectedIndex > 0) {
-      this.setState({ selectedIndex: this.state.selectedIndex - 1 });
-    } else {
-      this.setState({ selectedIndex: this.props.suggestions.length });
-    }
-  }
-
-  enterKey() {
-    const value = this.props.suggestions[this.state.selectedIndex] || '';
-    this.props.useSuggestion(value);
-  }
-
-  renderListItems() {
-    return this.props.suggestions.map((item, index) => {
+    return suggestions.map((item, index) => {
       let classes = classnames(`typeahead__li--${index}`, {
-        hovered: index === this.state.selectedIndex,
+        hovered: index === selectedIndex && !mouseHovering,
       });
 
       return (
@@ -87,7 +86,7 @@ class Typeahead extends React.Component<Props, State> {
           className={classes}
           onClick={e => {
             const value = e.target.innerHTML || '';
-            this.props.useSuggestion(value);
+            useSuggestion(value);
           }}
         >
           {item}
@@ -96,10 +95,27 @@ class Typeahead extends React.Component<Props, State> {
     });
   }
 
+  componentDidMount() {
+    window.addEventListener('keydown', this._onKeyDown);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this._onKeyDown);
+  }
+
   render() {
     return (
-      <ul className="typeahead__ul" ref="typeaheadResults">
-        {this.renderListItems()}
+      <ul
+        className="typeahead__ul"
+        onMouseEnter={() => {
+          this.setState({ mouseHovering: true });
+        }}
+        onMouseLeave={() => {
+          this.setState({ mouseHovering: false });
+        }}
+        ref="typeaheadResults"
+      >
+        {this._renderListItems()}
       </ul>
     );
   }
