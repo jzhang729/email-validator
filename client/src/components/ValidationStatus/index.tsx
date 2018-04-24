@@ -13,16 +13,16 @@ class ValidationStatus extends React.Component<Props, {}> {
   constructor(props: Props) {
     super(props);
 
-    this.renderFailure = this.renderFailure.bind(this);
-    this.renderLoading = this.renderLoading.bind(this);
-    this.renderSuccess = this.renderSuccess.bind(this);
+    this._renderFailure = this._renderFailure.bind(this);
+    this._renderLoading = this._renderLoading.bind(this);
+    this._renderSuccess = this._renderSuccess.bind(this);
   }
 
-  private renderFailure() {
+  _renderFailure() {
     return <span className="invalid">{this.props.reason}</span>;
   }
 
-  private renderLoading() {
+  _renderLoading() {
     let classes = classnames({
       'circle-loader': this.props.checking && this.props.valid,
       'load-complete': !this.props.loading,
@@ -31,7 +31,7 @@ class ValidationStatus extends React.Component<Props, {}> {
     return classes;
   }
 
-  private renderSuccess() {
+  _renderSuccess() {
     if (this.props.loading || !this.props.checking) {
       return null;
     }
@@ -43,10 +43,10 @@ class ValidationStatus extends React.Component<Props, {}> {
     return <div className={classes} />;
   }
 
-  public render() {
+  render() {
     return (
-      <div className={this.renderLoading()}>
-        {this.props.valid ? this.renderSuccess() : this.renderFailure()}
+      <div className={this._renderLoading()}>
+        {this.props.valid ? this._renderSuccess() : this._renderFailure()}
       </div>
     );
   }

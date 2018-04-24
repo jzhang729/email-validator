@@ -166,6 +166,8 @@ class EmailForm extends React.Component<Props, State> {
             suggestions: [],
             valid: true,
           });
+
+          return;
         }
 
         let detailedReason = reason

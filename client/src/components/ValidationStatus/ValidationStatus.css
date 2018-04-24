@@ -1,7 +1,8 @@
+/* CSS used and adapted for this project from: https://codepen.io/scottloway/pen/zqoLyQ */
 .circle-loader {
   margin-bottom: 2.5rem;
   border: 1px solid rgba(0, 0, 0, 0.2);
-  border-left-color: green;
+  border-left-color: #26a69a;
   animation: loader-spin 1.2s infinite linear;
   position: relative;
   display: inline-block;
@@ -13,7 +14,7 @@
 .load-complete {
   -webkit-animation: none;
   animation: none;
-  border-color: green;
+  border-color: #26a69a;
   transition: border 500ms ease-out; }
 
 .checkmark.draw:after {
@@ -27,15 +28,12 @@
   height: 2.5rem;
   width: 1.25rem;
   transform-origin: left top;
-  border-right: 3px solid green;
-  border-top: 3px solid green;
+  border-right: 3px solid #26a69a;
+  border-top: 3px solid #26a69a;
   content: '';
   left: 1.25rem;
   top: 2.5rem;
   position: absolute; }
-
-.hidden {
-  display: none; }
 
 .invalid {
   letter-spacing: 2px;

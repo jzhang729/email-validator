@@ -34,6 +34,7 @@ class Typeahead extends React.Component<Props, State> {
     const { selectedIndex } = this.state;
 
     if (selectedIndex < this.props.suggestions.length) {
+      // Adding 1 to -1 starts the index at 0
       this.setState({ selectedIndex: selectedIndex + 1 });
     } else {
       this.setState({ selectedIndex: 0 });
@@ -52,7 +53,7 @@ class Typeahead extends React.Component<Props, State> {
 
   _keyEnter() {
     const value = this.props.suggestions[this.state.selectedIndex] || '';
-    this.props.useSuggestion(value);
+    setTimeout(this.props.useSuggestion(value), 1000);
   }
 
   _onKeyDown(e) {
@@ -71,6 +72,10 @@ class Typeahead extends React.Component<Props, State> {
     }
   }
 
+  /**
+   * Renders the typeahead results as list items and allow user to use the
+   * mouse or use up/down arrow keys to pick results
+   */
   _renderListItems() {
     const { suggestions, useSuggestion } = this.props;
     const { selectedIndex, mouseHovering } = this.state;
