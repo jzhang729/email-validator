@@ -61,12 +61,17 @@ class EmailForm extends React.Component<Props, State> {
    * @param e {event} They keyboard event that initiates the callback.
    */
   _checkEmail(e: any) {
+    clearTimeout(this.timeout);
+
     // Detect the @ symbol to initiate typeahead
     if (e.which === 64 || e.key === '@') {
       this._initTypeahead();
+    } else if (e.which === 13 || 9) {
+      // Fixes a timing issue where the user might see an error after they
+      // confirm a typeahead selection
+      this.setState({ reason: '' });
     }
 
-    clearTimeout(this.timeout);
     this.timeout = setTimeout(this._verifyEmail, 1000);
   }
 
@@ -75,6 +80,16 @@ class EmailForm extends React.Component<Props, State> {
    */
   _initTypeahead() {
     this.refs.textInput.addEventListener('keyup', this._typeaheadCallback);
+  }
+
+  /**
+   * We need to prevent the browser from tabbing from text input
+   * to the address bar so that we can use it for when the typeahead is open.
+   */
+  _modifyTabKey(e) {
+    if (e.which === 9) {
+      e.preventDefault();
+    }
   }
 
   /**
@@ -88,7 +103,7 @@ class EmailForm extends React.Component<Props, State> {
 
     let queryLength;
 
-    if (email.length === 0 || this.props.emailSuggestions.indexOf(query) > -1) {
+    if (email.length === 0 || email.indexOf('@') === -1) {
       this.setState({ suggestions: [] });
     }
 
@@ -115,16 +130,14 @@ class EmailForm extends React.Component<Props, State> {
    * the string, setting a new state.
    */
   _useSuggestion(value) {
+    // Unbind the keyup event listener on the text input
+    this.refs.textInput.removeEventListener('keyup', this._typeaheadCallback);
+
     const inputValue = this.refs.textInput.value;
     const substringToReplace = /@.*$/;
     const newString = inputValue.replace(substringToReplace, `@${value}`);
 
-    // Set valid state to false to prevent re-rendering of renderSuccess
-    // function in the ValidationStatus component
     this.setState({ email: newString, suggestions: [], valid: false });
-
-    // Unbind the keyup event listener on the text input
-    this.refs.textInput.removeEventListener('keyup', this._typeaheadCallback);
   }
 
   /**
@@ -180,8 +193,8 @@ class EmailForm extends React.Component<Props, State> {
         detailedReason += '. Please check and try again.';
 
         this.setState({
+          checking: false,
           loading: false,
-          suggestions: [],
           reason: detailedReason,
           valid: false,
         });
@@ -190,12 +203,13 @@ class EmailForm extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.timeout = false;
     this.refs.textInput.focus();
+    window.addEventListener('keydown', this._modifyTabKey);
   }
 
   componentWillUnmount() {
     this.refs.textInput.removeEventListener('keyup', this._typeaheadCallback);
+    window.removeEventListener('keydown', this._modifyTabKey);
   }
 
   render() {

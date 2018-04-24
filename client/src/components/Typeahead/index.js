@@ -53,18 +53,24 @@ class Typeahead extends React.Component<Props, State> {
 
   _keyEnter() {
     const value = this.props.suggestions[this.state.selectedIndex] || '';
+    // Set a delay so that _checkEmail() function on the parent component does
+    // not fire right away and can register the new e-mail string.
     setTimeout(this.props.useSuggestion(value), 1000);
   }
 
   _onKeyDown(e) {
+    e.stopPropagation();
     switch (e.which) {
-      case 13:
+      case 9: // tab
+        this._keyArrowDown();
+        this._keyEnter();
+      case 13: // enter
         this._keyEnter();
         break;
-      case 38:
+      case 38: // up arrow
         this._keyArrowUp();
         break;
-      case 40:
+      case 40: // down arrow
         this._keyArrowDown();
         break;
       default:
@@ -91,7 +97,10 @@ class Typeahead extends React.Component<Props, State> {
           className={classes}
           onClick={e => {
             const value = e.target.innerHTML || '';
-            useSuggestion(value);
+            // Set a delay so that _checkEmail() function on the parent
+            // component does not fire right away and can register the new
+            // e-mail string.
+            setTimeout(useSuggestion(value), 1000);
           }}
         >
           {item}

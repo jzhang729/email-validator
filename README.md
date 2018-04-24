@@ -20,19 +20,30 @@ Inside the project folder, run the following command in the terminal. This will 
 npm run setup
 ```
 
-The project has a `.env` file that requires a [Kickbox.io](http://kickbox.io) API key. The project has the sandbox key from my account by default, but feel free to replace with your own to get actual API responses.
-
-The default typeahead e-mail suggestions are:
+The project has a `.env.sample` file that requires a [Kickbox.io](http://kickbox.io) API key. Replace where it says `[insert Kickbox.io API key here]` with a test or production API key, otherwise use my test key:
 
 ```
-'gmail.com',
-'gmail.co.uk',
-'hotmail.com',
-'yahoo.com',
-'yahoo.ca'
+test_8d71abca3d95acad9ac7e26ac6317714de975a6afef3fef200ed1a980d4fffd0
 ```
 
-These can be modified inside of the `client/config.js` file.
+Rename `.env.sample` to `.env`.
+
+The project has the sandbox key from my account by default, but feel free to replace with your own to get actual API responses.
+
+The included default typeahead e-mail suggestions are:
+
+```
+apple.com
+gmail.com
+gmail.co.uk
+hotmail.com
+icloud.com
+me.com
+yahoo.com
+yahoo.ca
+```
+
+These can be modified inside of the `client/src/config.js` file as desired.
 
 Run the npm 'dev' script.
 
@@ -48,4 +59,4 @@ Visit http://localhost:3000 in your browser.
 
 * [Github](https://github.com/jzhang729)
 * [Email](mailto:jordanzhang@gmail.com)
-* [Phone](tel:15149245123)
+* Phone: +1-514-924-5123
