@@ -28,8 +28,6 @@ test_8d71abca3d95acad9ac7e26ac6317714de975a6afef3fef200ed1a980d4fffd0
 
 Rename `.env.sample` to `.env`.
 
-The project has the sandbox key from my account by default, but feel free to replace with your own to get actual API responses.
-
 The included default typeahead e-mail suggestions are:
 
 ```
@@ -45,7 +43,9 @@ yahoo.ca
 
 These can be modified inside of the `client/src/config.js` file as desired.
 
-Run the npm 'dev' script.
+Run the npm 'dev' script to start the local development server.
+
+**Please note: Any time you change the .env file, you must restart the server for changes to take effect.**
 
 ```
 npm run dev
