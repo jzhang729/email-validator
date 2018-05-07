@@ -9,7 +9,7 @@ class App extends React.Component {
     return (
       <div className="App">
         <Header
-          title="Invoice Simple E-mail Validator"
+          title="E-mail Validator"
           bgColor="#2e78b7"
           textColor="#f5f5f5"
         />

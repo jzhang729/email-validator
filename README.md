@@ -1,14 +1,6 @@
 # E-mail Validator
 
-Technical assessment submission for the role of Web Engineer at Invoice Simple.
-
-Job Posting:
-
-https://www.invoicesimple.com/careers/web-engineer-front-end?utm_source=recruiterflow&utm_medium=email&utm_campaign=web-engineer&utm_content=career
-
-Specs:
-
-https://share.nuclino.com/p/Web-coding-challange-O9Lo1q9x3x27es4PU2KenP
+A side project written in Typescript that uses the Kickbox API to validate e-mail addresses typed in by the user.
 
 ## Instructions
 
@@ -59,4 +51,3 @@ Visit http://localhost:3000 in your browser.
 
 * [Github](https://github.com/jzhang729)
 * [Email](mailto:jordanzhang@gmail.com)
-* Phone: +1-514-924-5123

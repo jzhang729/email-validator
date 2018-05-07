@@ -1,6 +1,6 @@
 {
-  "short_name": "Invoice Simple E-mail Validator",
-  "name": "Invoice Simple E-mail Validator",
+  "short_name": "E-mail Validator",
+  "name": "E-mail Validator",
   "icons": [
     {
       "src": "favicon.ico",
